@@ -47,6 +47,13 @@ function evaluateVehicle(vehicle) {
   return niceToHavePoints >= carScoreMinimum;
 }
 
+async function sendTelegramMessageWithDelay(messages) {
+  for (let i = 0; i < messages.length; i++) {
+    await new Promise(resolve => setTimeout(resolve, 1000)); // 1000 ms delay
+    bot.sendMessage(chatId, messages[i]);
+  }
+}
+
 async function checkForNewVehicles() {
   try {
     const newVehicleList = await fetchSearchResults();
@@ -59,8 +66,9 @@ async function checkForNewVehicles() {
 
     if (qualifiedNewVehicles.length > 0) {
       console.log('Found new fitted cars:', qualifiedNewVehicles.length);
-      qualifiedNewVehicles.forEach(vehicle => {
-        const message = `
+      // Car links console 
+      qualifiedNewVehicles.forEach(vehicle => console.log(`https://www.mercedes-benz.de/passengercars/buy/used-car-search.html/u/gebrauchte-fahrzeuge/d/fahrzeugdetails/?id=${vehicle.id}`));
+      const messages = qualifiedNewVehicles.map(vehicle => `
         New Vehicle Found:
 
 
@@ -69,14 +77,11 @@ async function checkForNewVehicles() {
         Km: ${vehicle.condition.mileage}
         Price: ${vehicle.genericFields.genericInt1} €
         Link: https://www.mercedes-benz.de/passengercars/buy/used-car-search.html/u/gebrauchte-fahrzeuge/d/fahrzeugdetails/?id=${vehicle.id}
-        `;
-        bot.sendMessage(chatId, message);
-        const message2 = `
-        --------------------------------
-        `;
-        bot.sendMessage(chatId, message2);
-        console.log(message);
-      });
+
+
+        --------------------------------------
+      `);
+      await sendTelegramMessageWithDelay(messages);
       vehicleList = [...vehicleList, ...qualifiedNewVehicles]; // Yeni araçları eski listeye ekle
     } else {
       console.log('There is no new car.');
