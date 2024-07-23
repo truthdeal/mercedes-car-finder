@@ -1,13 +1,16 @@
+require('dotenv').config();
 const axios = require('axios');
+const TelegramBot = require('node-telegram-bot-api');
 const { options } = require('./searchOptions.js');
 const {wishCarConfig} = require('./wishCarConfig.js');
 
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
+const chatId = process.env.TELEGRAM_CHAT_ID;
 
 const carScoreMinimum = 8;
 const searchPageCount = 10;
 let checkInterval = 1; // 1 hour search interval
 checkInterval = checkInterval * 60 * 60 * 1000; // Convert to milliseconds
-
 
 let vehicleList = [];
 
@@ -57,12 +60,22 @@ async function checkForNewVehicles() {
     if (qualifiedNewVehicles.length > 0) {
       console.log('Found new fitted cars:', qualifiedNewVehicles.length);
       qualifiedNewVehicles.forEach(vehicle => {
-        console.log(`Vehicle: ${vehicle.vehicleConfiguration.salesDescription}`);
-        console.log(`Year: ${vehicle.vehicleConfiguration.modelYear}`);
-        console.log(`Km: ${vehicle.condition.mileage}`);
-        console.log(`Price: ${vehicle.genericFields.genericInt1} €`);
-        console.log('Link:', `https://www.mercedes-benz.de/passengercars/buy/used-car-search.html/u/gebrauchte-fahrzeuge/d/fahrzeugdetails/?id=${vehicle.id}`);
-        console.log('---');
+        const message = `
+        New Vehicle Found:
+
+
+        Vehicle: ${vehicle.vehicleConfiguration.salesDescription}
+        Year: ${vehicle.vehicleConfiguration.modelYear}
+        Km: ${vehicle.condition.mileage}
+        Price: ${vehicle.genericFields.genericInt1} €
+        Link: https://www.mercedes-benz.de/passengercars/buy/used-car-search.html/u/gebrauchte-fahrzeuge/d/fahrzeugdetails/?id=${vehicle.id}
+        `;
+        bot.sendMessage(chatId, message);
+        const message2 = `
+        --------------------------------
+        `;
+        bot.sendMessage(chatId, message2);
+        console.log(message);
       });
       vehicleList = [...vehicleList, ...qualifiedNewVehicles]; // Yeni araçları eski listeye ekle
     } else {
