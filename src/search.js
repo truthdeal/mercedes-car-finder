@@ -82,7 +82,7 @@ async function checkForNewVehicles() {
         --------------------------------------
       `);
       await sendTelegramMessageWithDelay(messages);
-      vehicleList = [...vehicleList, ...qualifiedNewVehicles]; // Yeni araçları eski listeye ekle
+      vehicleList = [...vehicleList, ...qualifiedNewVehicles]; 
     } else {
       console.log('There is no new car.');
     }
